@@ -2,13 +2,12 @@ const jwt = require("jsonwebtoken");
 const { config } = require("../config/config");
 
 exports.createSession = (user) => {
-  // Create session token
   const token = jwt.sign(
     {
       id: user.id,
       email: user.email,
       role: user.role,
-      session: Date.now(), // Add session identifier
+      session: Date.now(),
     },
     config.jwtSecret,
     { expiresIn: "30d" }
@@ -26,9 +25,6 @@ exports.validateSession = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, config.jwtSecret);
-
-    // Add session validation logic here if needed
-    // For example, check against a blacklist of revoked tokens
 
     req.user = decoded;
     next();

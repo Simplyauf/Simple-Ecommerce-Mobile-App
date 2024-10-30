@@ -3,7 +3,6 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const { config } = require("../config/config");
 
-// Add debug logging for Cloudinary config
 console.log("Cloudinary Config:", {
   cloud_name: config.cloudinaryName ? "Set" : "Not Set",
   api_key: config.cloudinaryApiKey ? "Set" : "Not Set",
@@ -29,7 +28,6 @@ const storage = new CloudinaryStorage({
   },
 });
 
-// Debug the file filter
 const fileFilter = (req, file, cb) => {
   console.log("Received file:", {
     fieldname: file.fieldname,
@@ -56,11 +54,10 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 5 * 1024 * 1024,
   },
 });
 
-// Enhanced error handling
 const handleUploadError = (error, req, res, next) => {
   console.error("Upload Error:", error);
 

@@ -48,7 +48,6 @@ exports.getProducts = async (req, res) => {
 
     const { rows } = await pool.query(query, params);
 
-    // Get total count for pagination
     const countQuery = `
       SELECT COUNT(*) FROM products p 
       LEFT JOIN categories c ON p.category_id = c.id 
@@ -191,17 +190,14 @@ exports.updateProduct = async (req, res) => {
       stock,
     } = req.body;
 
-    // Get image_url from uploaded file
     const image_url = req.file ? req.file.path : null;
 
-    // Generate new slug if name is being updated
     const newSlug = name ? slugify(name, { lower: true }) : slug;
 
     const updateFields = [];
     const values = [];
     let paramCounter = 1;
 
-    // Dynamically build update query based on provided fields
     if (name) {
       updateFields.push(`name = $${paramCounter}`);
       values.push(name);
@@ -251,26 +247,22 @@ exports.updateProduct = async (req, res) => {
       paramCounter++;
     }
 
-    // Add image_url to update if new file was uploaded
     if (image_url) {
       updateFields.push(`image_url = $${paramCounter}`);
       values.push(image_url);
       paramCounter++;
 
-      // Get the old image URL to delete it from Cloudinary
       const { rows: oldProduct } = await pool.query(
         "SELECT image_url FROM products WHERE slug = $1",
         [slug]
       );
 
       if (oldProduct[0]?.image_url) {
-        // Extract public_id from the old URL
         const publicId = oldProduct[0].image_url.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(`products/${publicId}`);
       }
     }
 
-    // Add the slug for WHERE clause
     values.push(slug);
 
     const query = `
@@ -283,7 +275,6 @@ exports.updateProduct = async (req, res) => {
     const { rows } = await pool.query(query, values);
 
     if (rows.length === 0) {
-      // If no product found but image was uploaded, delete it
       if (req.file && req.file.path) {
         await cloudinary.uploader.destroy(req.file.filename);
       }
@@ -292,7 +283,6 @@ exports.updateProduct = async (req, res) => {
 
     res.json(rows[0]);
   } catch (error) {
-    // If there's an error and an image was uploaded, delete it
     if (req.file && req.file.path) {
       await cloudinary.uploader.destroy(req.file.filename);
     }
@@ -317,7 +307,6 @@ exports.deleteProduct = async (req, res) => {
   try {
     const { slug } = req.params;
 
-    // Get the product to delete its image
     const { rows: productToDelete } = await pool.query(
       "SELECT image_url FROM products WHERE slug = $1",
       [slug]
@@ -332,7 +321,6 @@ exports.deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Delete image from Cloudinary if it exists
     if (productToDelete[0]?.image_url) {
       const publicId = productToDelete[0].image_url
         .split("/")

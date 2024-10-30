@@ -4,14 +4,6 @@ const { auth } = require("../middleware/auth");
 const { upload, handleUploadError } = require("../middleware/upload");
 
 router.post("/", auth, async (req, res) => {
-  //   console.log("File details:", {
-  //     file: req.file,
-  //     filename: req?.file?.filename,
-  //     path: req?.file?.path,
-  //     mimetype: req?.file?.mimetype,
-  //     size: req?.file?.size,
-  //     uri: req?.uri,
-  //   });
   console.log("File details:", req.files);
 
   try {

@@ -9,7 +9,6 @@ exports.createOrder = async (req, res) => {
     const { items } = req.body;
     let totalAmount = 0;
 
-    // Calculate total amount and verify stock
     for (const item of items) {
       const { rows } = await client.query(
         "SELECT price, stock FROM products WHERE id = $1",
@@ -27,13 +26,11 @@ exports.createOrder = async (req, res) => {
       totalAmount += rows[0].price * item.quantity;
     }
 
-    // Create order
     const { rows: orderRows } = await client.query(
       "INSERT INTO orders (user_id, total_amount) VALUES ($1, $2) RETURNING *",
       [req.user.id, totalAmount]
     );
 
-    // Create order items and update stock
     for (const item of items) {
       await client.query(
         "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",

@@ -1,5 +1,4 @@
 const responseHandler = (req, res, next) => {
-  // Override res.json to standardize response format
   const originalJson = res.json;
   res.json = function (data) {
     const standardResponse = {
@@ -11,7 +10,7 @@ const responseHandler = (req, res, next) => {
     };
 
     let finalResponse = data?.errors ? data : standardResponse;
-    // Remove undefined fields
+
     Object.keys(finalResponse).forEach(
       (key) => finalResponse[key] === undefined && delete finalResponse[key]
     );
@@ -19,7 +18,6 @@ const responseHandler = (req, res, next) => {
     return originalJson.call(this, finalResponse);
   };
 
-  // Override res.error to handle error responses
   res.error = function (statusCode, message, error = null) {
     const errorResponse = {
       errors: true,
